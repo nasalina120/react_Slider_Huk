@@ -6,15 +6,31 @@ import DOGS_COLLECTION from "./data/dogData";
 export default function AnimalSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextDog = () => {
-    if (!DOGS_COLLECTION || DOGS_COLLECTION.length === 0) return;
+  const hasDogs = DOGS_COLLECTION && DOGS_COLLECTION.length > 0;
 
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % DOGS_COLLECTION.length);
+  const nextDog = () => {
+    if (!hasDogs) return;
+
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex < DOGS_COLLECTION.length - 1) {
+        return prevIndex + 1;
+      }
+      return prevIndex;
+    });
   };
 
-  const hasDogs = DOGS_COLLECTION && DOGS_COLLECTION.length > 0;
-  const currentDog = hasDogs ? DOGS_COLLECTION[currentIndex] : null;
+  const prevDog = () => {
+    if (!hasDogs) return;
 
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex > 0) {
+        return prevIndex - 1;
+      }
+      return prevIndex;
+    });
+  };
+
+  const currentDog = hasDogs ? DOGS_COLLECTION[currentIndex] : null;
   const imgSrc = currentDog ? currentDog.imgSrc : dogImage;
   const caption = currentDog
     ? currentDog.caption
@@ -22,12 +38,15 @@ export default function AnimalSlider() {
 
   return (
     <>
+      <p>{currentIndex}</p>
       <figure className={styles.sliderContainer}>
         <img src={imgSrc} alt={caption} />
         <figcaption>{caption}</figcaption>
       </figure>
-
-      <button onClick={nextDog}>Dogbutton</button>
+      <div>
+        <button onClick={prevDog}>{"<"}</button>
+        <button onClick={nextDog}>{">"}</button>
+      </div>
     </>
   );
 }
