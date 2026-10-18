@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dogImage from "./dogImage.jpg";
 import styles from "./AnimalSlider.module.sass";
 import DOGS_COLLECTION from "./data/dogData";
@@ -7,6 +7,13 @@ export default function AnimalSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const hasDogs = DOGS_COLLECTION && DOGS_COLLECTION.length > 0;
+  const currentDog = hasDogs ? DOGS_COLLECTION[currentIndex] : null;
+  const imgSrc = currentDog ? currentDog.imgSrc : dogImage;
+  const caption = currentDog
+    ? currentDog.caption
+    : "No dog information available";
+
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const nextDog = () => {
     if (!hasDogs) return;
@@ -30,11 +37,22 @@ export default function AnimalSlider() {
     });
   };
 
-  const currentDog = hasDogs ? DOGS_COLLECTION[currentIndex] : null;
-  const imgSrc = currentDog ? currentDog.imgSrc : dogImage;
-  const caption = currentDog
-    ? currentDog.caption
-    : "No dog information available";
+  const changePlay = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    let timerId = null;
+    if (isPlaying) {
+      timerId = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % DOGS_COLLECTION.length);
+      }, 5000);
+    }
+    console.log(timerId);
+    return () => {
+      clearInterval(timerId);
+    };
+  }, [currentIndex, isPlaying]);
 
   return (
     <>
@@ -46,6 +64,9 @@ export default function AnimalSlider() {
       <div>
         <button onClick={prevDog}>{"<"}</button>
         <button onClick={nextDog}>{">"}</button>
+      </div>
+      <div>
+        <button onClick={changePlay}>{isPlaying ? "Пауза" : "Старт"}</button>
       </div>
     </>
   );
