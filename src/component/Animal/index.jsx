@@ -5,6 +5,9 @@ import DOGS_COLLECTION from "./data/dogData";
 
 export default function AnimalSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(2000);
+  const [inputValue, setInputValue] = useState(currentTime);
 
   const hasDogs = DOGS_COLLECTION && DOGS_COLLECTION.length > 0;
   const currentDog = hasDogs ? DOGS_COLLECTION[currentIndex] : null;
@@ -12,8 +15,6 @@ export default function AnimalSlider() {
   const caption = currentDog
     ? currentDog.caption
     : "No dog information available";
-
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const nextDog = () => {
     if (!hasDogs) return;
@@ -38,7 +39,7 @@ export default function AnimalSlider() {
   };
 
   const changePlay = () => {
-    setIsPlaying(!isPlaying);
+    setIsPlaying((prevIsPlay) => !prevIsPlay);
   };
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function AnimalSlider() {
     if (isPlaying) {
       timerId = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % DOGS_COLLECTION.length);
-      }, 5000);
+      }, currentTime);
     }
     console.log(timerId);
     return () => {
@@ -54,20 +55,53 @@ export default function AnimalSlider() {
     };
   }, [currentIndex, isPlaying]);
 
+  const handlerChangeTimer = () => {
+    setCurrentTime(Number(inputValue));
+  };
   return (
-    <>
-      <p>{currentIndex}</p>
+    <div className={styles.sliderWrapper}>
+      <p className={styles.counter}>Поточний індекс: {currentIndex}</p>
+
       <figure className={styles.sliderContainer}>
-        <img src={imgSrc} alt={caption} />
-        <figcaption>{caption}</figcaption>
+        <img className={styles.sliderImg} src={imgSrc} alt={caption} />
+        <figcaption className={styles.sliderCaption}>{caption}</figcaption>
       </figure>
-      <div>
-        <button onClick={prevDog}>{"<"}</button>
-        <button onClick={nextDog}>{">"}</button>
+
+      <div className={styles.controlsRow}>
+        <button className={styles.navButton} onClick={prevDog}>
+          {"<"}
+        </button>
+        <button className={styles.navButton} onClick={nextDog}>
+          {">"}
+        </button>
       </div>
-      <div>
-        <button onClick={changePlay}>{isPlaying ? "Пауза" : "Старт"}</button>
+
+      <div className={styles.controlsRow}>
+        <button
+          className={
+            isPlaying ? styles.actionButtonActive : styles.actionButton
+          }
+          onClick={changePlay}
+        >
+          {isPlaying ? "Пауза" : "Старт"}
+        </button>
       </div>
-    </>
+
+      <div className={styles.timerSettings}>
+        <label className={styles.timerLabel}>
+          <input
+            className={styles.timerInput}
+            type="text"
+            name="timer"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+          Интервал (мс):
+        </label>
+        <button className={styles.actionButton} onClick={handlerChangeTimer}>
+          Змінити час
+        </button>
+      </div>
+    </div>
   );
 }
