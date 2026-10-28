@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
+
+import { AiOutlineFullscreen } from "react-icons/ai";
+import { AiOutlineFullscreenExit } from "react-icons/ai";
+
+import DOGS_COLLECTION from "./data/dogData";
+
 import dogImage from "./dogImage.jpg";
 import styles from "./AnimalSlider.module.sass";
-import DOGS_COLLECTION from "./data/dogData";
 
 export default function AnimalSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(2000);
   const [inputValue, setInputValue] = useState(currentTime);
+  const [isFullScreen, setFullScreen] = useState(false);
+  const [isBtnVisibleFullS, setBtnVisibleFullS] = useState(false);
 
   const hasDogs = DOGS_COLLECTION && DOGS_COLLECTION.length > 0;
   const currentDog = hasDogs ? DOGS_COLLECTION[currentIndex] : null;
@@ -18,24 +25,16 @@ export default function AnimalSlider() {
 
   const nextDog = () => {
     if (!hasDogs) return;
-
-    setCurrentIndex((prevIndex) => {
-      if (prevIndex < DOGS_COLLECTION.length - 1) {
-        return prevIndex + 1;
-      }
-      return prevIndex;
-    });
+    setCurrentIndex((prevIndex) =>
+      prevIndex === DOGS_COLLECTION.length - 1 ? 0 : prevIndex + 1,
+    );
   };
 
   const prevDog = () => {
     if (!hasDogs) return;
-
-    setCurrentIndex((prevIndex) => {
-      if (prevIndex > 0) {
-        return prevIndex - 1;
-      }
-      return prevIndex;
-    });
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? DOGS_COLLECTION.length - 1 : prevIndex - 1,
+    );
   };
 
   const changePlay = () => {
@@ -44,26 +43,58 @@ export default function AnimalSlider() {
 
   useEffect(() => {
     let timerId = null;
-    if (isPlaying) {
+    if (isPlaying && hasDogs) {
       timerId = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % DOGS_COLLECTION.length);
+        setCurrentIndex((prevIndex) =>
+          prevIndex === DOGS_COLLECTION.length - 1 ? 0 : prevIndex + 1,
+        );
       }, currentTime);
     }
-    console.log(timerId);
     return () => {
       clearInterval(timerId);
     };
-  }, [currentIndex, isPlaying]);
+  }, [isPlaying, currentTime, hasDogs]);
 
   const handlerChangeTimer = () => {
     setCurrentTime(Number(inputValue));
+  };
+
+  const handelMouseEnter = () => {
+    setBtnVisibleFullS(true);
+  };
+
+  const handelMouseLeave = () => {
+    setBtnVisibleFullS(false);
+  };
+
+  const toggleFullScreen = () => {
+    setFullScreen((prevFullScreen) => !prevFullScreen);
   };
   return (
     <div className={styles.sliderWrapper}>
       <p className={styles.counter}>Поточний індекс: {currentIndex}</p>
 
       <figure className={styles.sliderContainer}>
-        <img className={styles.sliderImg} src={imgSrc} alt={caption} />
+        <div
+          onMouseEnter={handelMouseEnter}
+          onMouseLeave={handelMouseLeave}
+          className={
+            isFullScreen ? styles.imgContainerFull : styles.sliderImgWrapper
+          }
+        >
+          <img className={styles.sliderImg} src={imgSrc} alt={caption} />
+
+          {isBtnVisibleFullS && (
+            <button onClick={toggleFullScreen} className={styles.fullScreenBtn}>
+              {isFullScreen ? (
+                <AiOutlineFullscreenExit />
+              ) : (
+                <AiOutlineFullscreen />
+              )}
+            </button>
+          )}
+        </div>
+
         <figcaption className={styles.sliderCaption}>{caption}</figcaption>
       </figure>
 
